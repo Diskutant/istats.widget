@@ -6,83 +6,35 @@
  *
  */
 
-/**
- * Visual appearance configuration
- */
 ui: {
-  /* Vertical position in PX, either top or bottom */
-  top: '0',
-
-  //bottom: '0',
-
-  /* Horizontal position in PX, either left or right */
-  left: '0',
-
-  //right: '0',
-
-  /* Stats color */
+  top: '51rem', //51rem
+  bottom: '3rem',
+  left: '0rem',
   color: '#fff',
-
-  /* Stats donut background color*/
   bgcolor: 'transparent',
-
-  /* Stats width in PX */
-  width: 80,
-
-  /* Stats height in PX */
-  height: 80,
-
-  /* Stats radius in PX, needs be be at leat (width/2 - thickness) */
-  radius: 30,
-
-  /* Donut line thickness in PX */
-  thickness: 8,
-
-  /* Icon size in PX */
-  iconsize: 30,
-
-  /* Icon height in PX */
-  iconheight: 75,
-
-  /* Label font size in PX */
-  fontsize: 12
+  width: 60,
+  height: 40,
+  radius: 15,
+  thickness: 4,
+  iconsize: 1,
+  iconheight: 2.4125,
+  displaylabel: 'block',
+//  fontsize: 0.4125
+  fontsize: 0.75,
 }
 
 ,command: 'istats.widget/istats.sh'
 
-,refreshFrequency: 3000
+,refreshFrequency: 10000
 
 ,render: function(output) {
   var data = this.parseOutput(output);
-  var html  = '<div id="stats" ';
-      html +=      'style="color: ' + this.ui.color + '; ';
-  if (this.ui.top) {
-      html +=           'top:' + this.ui.top + 'px; ';
-  } else if (this.ui.bottom) {
-      html +=           'bottom:' + this.ui.bottom + 'px; ';
-  }
-  if (this.ui.left) {
-      html +=           'left:' + this.ui.left + 'px; ';
-  } else if (this.ui.right) {
-      html +=           'right:' + this.ui.right + 'px; ';
-  }
-  html += '">';
-
-  if (data.cpu) {
+  var html  = '<div id="stats">';
       html += this.renderChart('CPU', 'icon-cpu', 100, 0);
-  }
-
-  if (data.battery) {
-      html += this.renderChart('Battery', 'icon-carbattery', 100, 0);
-  }
-  
-  if (data.fan) {
-    for (var i = 0; i < data.fan['total-fans-in-system']; i++) {
+  for (var i = 0; i < data.fan['total-fans-in-system']; i++) {
       html += this.renderChart('Fan ' + i, 'icon-fan', 100, 0);
-    }
   }
-  html +=  '</div>';
-
+      html +=  '</div>';
   return html;
 }
 
@@ -94,21 +46,12 @@ ui: {
   var data = this.parseOutput(output);
   var c = Math.floor(2 * Math.PI * this.ui.radius);
 
-  if (data.cpu) {
-    $('#stats .cpu circle.bar').css('stroke-dasharray', Math.floor( (data.cpu['cpu-temp'] / MAX_CPU * 100) * c/100) + ' ' + c);
-    $('#stats .cpu .temp').text(Math.floor(data.cpu['cpu-temp']) + '°C');
-  }
-  
-  if (data.battery) {
-    $('#stats .battery circle.bar').css('stroke-dasharray', Math.floor( (data.battery['current-charge'] / data.battery['maximum-charge'] * 100) * c/100) + ' ' + c);
-    $('#stats .battery .temp').text(Math.floor((data.battery['current-charge'] / data.battery['maximum-charge'] * 100)) + '%');
-  }
+  $('#stats .cpu circle.bar').css('stroke-dasharray', Math.floor( (data.cpu['cpu-temp'] / MAX_CPU * 100) * c/100) + ' ' + c);
+  $('#stats .cpu .temp').text(Math.floor(data.cpu['cpu-temp']) + '°C');
 
-  if (data.fan) {
-    for (var i = 0; i < data.fan['total-fans-in-system']; i++) {
-      $('#stats .fan-' + i + ' circle.bar').css('stroke-dasharray', Math.floor( (data.fan['fan-' + i + '-speed'] / MAX_FAN * 100) * c/100) + ' ' + c);
-      $('#stats .fan-' + i + ' .temp').text(Math.floor(data.fan['fan-' + i + '-speed']) + ' RPM');
-    }
+  for (var i = 0; i < data.fan['total-fans-in-system']; i++) {
+    $('#stats .fan-' + i + ' circle.bar').css('stroke-dasharray', Math.floor( (data.fan['fan-' + i + '-speed'] / MAX_FAN * 100) * c/100) + ' ' + c);
+    $('#stats .fan-' + i + ' .temp').text(Math.floor(data.fan['fan-' + i + '-speed']) + ' RPM');
   }
 }
 
@@ -117,15 +60,16 @@ ui: {
   var c = Math.floor(2 * Math.PI * this.ui.radius);
   var p = c / 100 * percentage;
 
-  var html  = '<div class="chart ' + title.replace(/\s/g, '-').toLowerCase() + '">';
-      html +=       '<i class="icon ' + icon + '" style="font-size: ' + this.ui.iconsize + 'px; line-height:' + this.ui.iconheight + 'px"></i>';
+  var html  = '<div class="chart ' + title.replace(/\s/g, '-').toLowerCase() + '" ';
+	  html +=      'style="bottom:' + this.ui.bottom + '; left:' + this.ui.left + '; color:' + this.ui.color + '">';
+      html +=       '<i class="icon ' + icon + '" style="font-size: ' + this.ui.iconsize + 'rem; line-height:' + this.ui.iconheight + 'rem"></i>';
       html +=       '<svg width="' + this.ui.width + 'px" height="' + this.ui.height + 'px">';
       html +=         '<circle class="bg" r="' + r + '" cx="' + (this.ui.width/2) + '" cy="' + (this.ui.height/2) + '"';
       html +=                ' style="stroke: ' + this.ui.bgcolor + '; stroke-width: ' + this.ui.thickness + '; stroke-dasharray: ' + c + ' ' + c + '"/>';
       html +=         '<circle class="bar" r="' + r + '" cx="' + (this.ui.width/2) + '" cy="' + (this.ui.height/2) + '" '; 
       html +=                ' style="stroke: ' + this.ui.color + '; stroke-width: ' + this.ui.thickness + '; stroke-dasharray: ' + p + ' ' + c + '" />';
       html +=       '</svg>';
-      html +=       '<div class="temp" style="font-size:' + this.ui.fontsize + 'px">' + temp + '</div>';
+      html +=       '<div class="temp" style="display:' + this.ui.displaylabel + '; font-size:' + this.ui.fontsize + 'rem">' + temp + '</div>';
       html += '</div>'; 
   return html;
 }
@@ -148,9 +92,6 @@ ui: {
     var e = line.split(':');
     var k = e.length > 0 ? e[0].toLowerCase().replace(/\s/g, '-') : null;
     var v = e.length > 1 ? e[1].replace(/.*?(\d+)(\.\d{0,1})*.*/, '$1$2') : null;
-    if (v === null) {
-      continue;
-    }
     if (section === 'CPU Stats') {
       o.cpu = o.cpu || {};
       o.cpu[k] = v; 
@@ -170,10 +111,12 @@ ui: {
 
 ,style: "                                                    \n\
   font-family: 'Helvetica Neue'                              \n\
-  font-size: 16px                                            \n\
-  width: 100%                                                \n\
-  height: 100%                                               \n\
+  font-size: 0.75rem                                         \n\
+  width: auto;                                               \n\
   transform: auto;                                           \n\
+  bottom: 0;												 \n\
+  font-weight:900;											 \n\
+  text-shadow: 0px 0px 3px #000;							 \n\
                                                              \n\
   @font-face                                                 \n\
     font-family: 'Icons';                                    \n\
@@ -189,23 +132,24 @@ ui: {
     font-style: normal                                       \n\
                                                              \n\
   #stats                                                     \n\
-    position: absolute                                       \n\
-    margin: 0 0                                              \n\
-    padding: 0 0                                             \n\
+    margin: 0px 0px                                          \n\
+    padding: 0px 0px                                         \n\
                                                              \n\
   #stats .chart                                              \n\
     position: relative                                       \n\
     float: left                                              \n\
-    margin: 0rem 1rem 0rem 1rem                              \n\
+    margin: 0 0		                                         \n\
                                                              \n\
   #stats .chart i                                            \n\
+    font-size: 1rem                                          \n\
     text-align: center                                       \n\
     position: absolute                                       \n\
+    line-height: 2.5rem                                      \n\
     width: 100%                                              \n\
                                                              \n\
   #stats .chart .temp                                        \n\
     text-align: center                                       \n\
-    display: block                                           \n\
+    font-size: 1rem                                          \n\
                                                              \n\
   #stats .chart svg                                          \n\
     transform: rotate(-90deg)                                \n\
@@ -215,9 +159,6 @@ ui: {
                                                              \n\
   #stats .chart .icon-cpu:before                             \n\
     content: '\\f002'                                        \n\
-                                                             \n\
-  #stats .chart .icon-carbattery:before                      \n\
-    content: '\\f553'                                        \n\
                                                              \n\
   #stats .chart .icon-fan:before                             \n\
     content: '\\f66f'                                        \n\
